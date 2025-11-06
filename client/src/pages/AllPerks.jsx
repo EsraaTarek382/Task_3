@@ -81,6 +81,24 @@ export default function AllPerks() {
     }
   }
 
+  // Load perks when component mounts (initial data load)
+  useEffect(() => {
+    loadAllPerks()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Auto-search when searchQuery or merchantFilter changes with debounce
+  useEffect(() => {
+    // Debounce to avoid flooding the server while typing
+    const id = setTimeout(() => {
+      loadAllPerks()
+    }, 500)
+
+    return () => clearTimeout(id)
+    // Intentionally not including loadAllPerks in deps to avoid re-creating the effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, merchantFilter])
+
   // ==================== EVENT HANDLERS ====================
 
   
@@ -136,7 +154,8 @@ export default function AllPerks() {
                 type="text"
                 className="input"
                 placeholder="Enter perk name..."
-                
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
               />
               <p className="text-xs text-zinc-500 mt-1">
                 Auto-searches as you type, or press Enter / click Search
@@ -151,7 +170,8 @@ export default function AllPerks() {
               </label>
               <select
                 className="input"
-                
+                value={merchantFilter}
+                onChange={e => setMerchantFilter(e.target.value)}
               >
                 <option value="">All Merchants</option>
                 
@@ -182,7 +202,7 @@ export default function AllPerks() {
             {/* Loading indicator */}
             {loading && (
               <div className="flex items-center gap-2 text-sm text-zinc-600">
-                <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                <span className="material-symbols-outlined text-sm animate-spin"></span>
                 Searching...
               </div>
             )}
